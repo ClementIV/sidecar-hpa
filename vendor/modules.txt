@@ -326,6 +326,8 @@ k8s.io/apimachinery/third_party/forked/golang/json
 k8s.io/apimachinery/third_party/forked/golang/reflect
 # k8s.io/apiserver v0.19.4 => k8s.io/apiserver v0.0.0-20201120050325-0e46f0ea2bdc
 ## explicit
+k8s.io/apiserver/pkg/features
+k8s.io/apiserver/pkg/util/feature
 # k8s.io/client-go v0.19.4 => k8s.io/client-go v0.0.0-20201121005859-fb61a7c88cb9
 ## explicit
 k8s.io/client-go/discovery
@@ -406,6 +408,8 @@ k8s.io/client-go/util/homedir
 k8s.io/client-go/util/jsonpath
 k8s.io/client-go/util/keyutil
 k8s.io/client-go/util/workqueue
+# k8s.io/component-base v0.0.0 => k8s.io/component-base v0.0.0-20201114090208-1e84b325f5ba
+k8s.io/component-base/featuregate
 # k8s.io/heapster v1.2.0-beta.1
 k8s.io/heapster/metrics/api/v1/types
 # k8s.io/klog/v2 v2.4.0
@@ -414,7 +418,9 @@ k8s.io/klog/v2
 k8s.io/kube-openapi/pkg/util/proto
 # k8s.io/kubernetes v1.19.4
 ## explicit
+k8s.io/kubernetes/pkg/api/v1/pod
 k8s.io/kubernetes/pkg/controller/podautoscaler/metrics
+k8s.io/kubernetes/pkg/features
 # k8s.io/metrics v0.19.4 => k8s.io/metrics v0.0.0-20201114091333-d70c0e0c6aa5
 ## explicit
 k8s.io/metrics/pkg/apis/custom_metrics
