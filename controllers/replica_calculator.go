@@ -71,7 +71,7 @@ func (c *ReplicaCalculator) GetResourceReplicas(currentReplicas int32, targetUti
 	}
 
 	log.Printf("-> metrics: %v\n", metrics)
-	podList, err := c.podsGetter.Pods(namespace).List(context.TODO(),metav1.ListOptions{LabelSelector: selector.String()})
+	podList, err := c.podsGetter.Pods(namespace).List(context.TODO(), metav1.ListOptions{LabelSelector: selector.String()})
 	if err != nil {
 		return 0, 0, 0, time.Time{}, fmt.Errorf("unable to get pods while calculating replica count: %v", err)
 	}
@@ -145,10 +145,10 @@ func (c *ReplicaCalculator) GetResourceReplicas(currentReplicas int32, targetUti
 		if usageRatio < 1.0 {
 			// on a scale-down, treat missing pods as using 100% of the resource request
 			for podName := range missingPods {
-				metrics[podName] =metricsclient.PodMetric{
+				metrics[podName] = metricsclient.PodMetric{
 					Timestamp: timestamp,
-					Window: defaultDownscaleForbiddenWindowSeconds,
-					Value: requests[podName],
+					Window:    defaultDownscaleForbiddenWindowSeconds,
+					Value:     requests[podName],
 				}
 
 			}
@@ -157,8 +157,8 @@ func (c *ReplicaCalculator) GetResourceReplicas(currentReplicas int32, targetUti
 			for podName := range missingPods {
 				metrics[podName] = metricsclient.PodMetric{
 					Timestamp: timestamp,
-					Window: defaultDownscaleForbiddenWindowSeconds,
-					Value: 0,
+					Window:    defaultDownscaleForbiddenWindowSeconds,
+					Value:     0,
 				}
 			}
 		}
@@ -169,8 +169,8 @@ func (c *ReplicaCalculator) GetResourceReplicas(currentReplicas int32, targetUti
 		for podName := range unreadyPods {
 			metrics[podName] = metricsclient.PodMetric{
 				Timestamp: timestamp,
-				Window: defaultDownscaleForbiddenWindowSeconds,
-				Value: 0,
+				Window:    defaultDownscaleForbiddenWindowSeconds,
+				Value:     0,
 			}
 		}
 	}
@@ -210,7 +210,7 @@ func (c *ReplicaCalculator) GetRawResourceReplicas(currentReplicas int32, target
 // (as a milli-value) for pods matching the given selector in the given namespace, and the
 // current replica count
 func (c *ReplicaCalculator) GetMetricReplicas(currentReplicas int32, targetUtilization int64, metricName string, namespace string, selector labels.Selector) (replicaCount int32, utilization int64, timestamp time.Time, err error) {
-	metrics, timestamp, err := c.metricsClient.GetRawMetric(metricName, namespace, selector,labels.NewSelector())
+	metrics, timestamp, err := c.metricsClient.GetRawMetric(metricName, namespace, selector, labels.NewSelector())
 	if err != nil {
 		return 0, 0, time.Time{}, fmt.Errorf("unable to get metric %s: %v", metricName, err)
 	}
@@ -221,7 +221,7 @@ func (c *ReplicaCalculator) GetMetricReplicas(currentReplicas int32, targetUtili
 
 // calcPlainMetricReplicas calculates the desired replicas for plain (i.e. non-utilization percentage) metrics.
 func (c *ReplicaCalculator) calcPlainMetricReplicas(metrics metricsclient.PodMetricsInfo, currentReplicas int32, targetUtilization int64, namespace string, selector labels.Selector) (replicaCount int32, utilization int64, err error) {
-	podList, err := c.podsGetter.Pods(namespace).List(context.TODO(),metav1.ListOptions{LabelSelector: selector.String()})
+	podList, err := c.podsGetter.Pods(namespace).List(context.TODO(), metav1.ListOptions{LabelSelector: selector.String()})
 	if err != nil {
 		return 0, 0, fmt.Errorf("unable to get pods while calculating replica count: %v", err)
 	}
@@ -275,8 +275,8 @@ func (c *ReplicaCalculator) calcPlainMetricReplicas(metrics metricsclient.PodMet
 			for podName := range missingPods {
 				metrics[podName] = metricsclient.PodMetric{
 					Timestamp: time.Now(),
-					Window: defaultDownscaleForbiddenWindowSeconds,
-					Value: targetUtilization,
+					Window:    defaultDownscaleForbiddenWindowSeconds,
+					Value:     targetUtilization,
 				}
 			}
 		} else {
@@ -284,8 +284,8 @@ func (c *ReplicaCalculator) calcPlainMetricReplicas(metrics metricsclient.PodMet
 			for podName := range missingPods {
 				metrics[podName] = metricsclient.PodMetric{
 					Timestamp: time.Now(),
-					Window: defaultDownscaleForbiddenWindowSeconds,
-					Value: 0,
+					Window:    defaultDownscaleForbiddenWindowSeconds,
+					Value:     0,
 				}
 			}
 		}
@@ -296,8 +296,8 @@ func (c *ReplicaCalculator) calcPlainMetricReplicas(metrics metricsclient.PodMet
 		for podName := range unreadyPods {
 			metrics[podName] = metricsclient.PodMetric{
 				Timestamp: time.Now(),
-				Window: defaultDownscaleForbiddenWindowSeconds,
-				Value: 0,
+				Window:    defaultDownscaleForbiddenWindowSeconds,
+				Value:     0,
 			}
 		}
 	}
@@ -319,7 +319,7 @@ func (c *ReplicaCalculator) calcPlainMetricReplicas(metrics metricsclient.PodMet
 // GetObjectMetricReplicas calculates the desired replica count based on a target metric utilization (as a milli-value)
 // for the given object in the given namespace, and the current replica count.
 func (c *ReplicaCalculator) GetObjectMetricReplicas(currentReplicas int32, targetUtilization int64, metricName string, namespace string, objectRef *autoscaling.CrossVersionObjectReference) (replicaCount int32, utilization int64, timestamp time.Time, err error) {
-	utilization, timestamp, err = c.metricsClient.GetObjectMetric(metricName, namespace, objectRef,labels.NewSelector())
+	utilization, timestamp, err = c.metricsClient.GetObjectMetric(metricName, namespace, objectRef, labels.NewSelector())
 	if err != nil {
 		return 0, 0, time.Time{}, fmt.Errorf("unable to get metric %s: %v on %s %s/%s", metricName, objectRef.Kind, namespace, objectRef.Name, err)
 	}

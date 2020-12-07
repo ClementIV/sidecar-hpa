@@ -41,23 +41,13 @@ type SHPASpec struct {
 	// Important: Run "make" to regenerate code after modifying this file
 
 	// part of HorizontalController, see comments in the k8s repo: pkg/controller/podautoscaler/horizontal.go
-	// +kubebuilder:validation:Minimum=1
-	// +kubebuilder:validation:Maximum=600
 	DownscaleForbiddenWindowSeconds int32 `json:"downscaleForbiddenWindowSeconds,omitempty"`
-	// +kubebuilder:validation:Minimum=1
-	// +kubebuilder:validation:Maximum=600
-	UpscaleForbiddenWindowSeconds int32 `json:"upscaleForbiddenWindowSeconds,omitempty"`
+	UpscaleForbiddenWindowSeconds   int32 `json:"upscaleForbiddenWindowSeconds,omitempty"`
 	// See the comment about this parameter above
-	// +kubebuilder:validation:Minimum=1
-	// +kubebuilder:validation:Maximum=10
-	ScaleUpLimitFactor float64 `json:"scaleUpLimitFactor,omitempty"`
+	ScaleUpLimitFactor float32 `json:"scaleUpLimitFactor,omitempty"`
 	// See the comment about this parameter above
-	// +kubebuilder:validation:Minimum=1
-	// +kubebuilder:validation:Maximum=20
-	ScaleUpLimitMinimum int32 `json:"scaleUpLimitMinimum,omitempty"`
-	// +kubebuilder:validation:Minimum=0.01
-	// +kubebuilder:validation:Maximum=0.99
-	Tolerance float64 `json:"tolerance,omitempty"`
+	ScaleUpLimitMinimum int32   `json:"scaleUpLimitMinimum,omitempty"`
+	Tolerance           float32 `json:"tolerance,omitempty"`
 
 	// part of HorizontalPodAutoscalerSpec, see comments in the k8s-1.10.8 repo: staging/src/k8s.io/api/autoscaling/v1/types.go
 	// reference to scaled resource; horizontal pod autoscaler will learn the current resource consumption

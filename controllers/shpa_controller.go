@@ -19,6 +19,9 @@ package controllers
 import (
 	"context"
 	"fmt"
+	"github.com/go-logr/logr"
+
+	//"github.com/go-logr/logr"
 	autoscaling "k8s.io/api/autoscaling/v2beta2"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -72,7 +75,6 @@ func Add(mgr manager.Manager) error {
 	return add(mgr, newReconciler(mgr))
 }
 
-
 // newReconciler returns a new reconcile.Reconciler
 func newReconciler(mgr manager.Manager) reconcile.Reconciler {
 	clientConfig := mgr.GetConfig()
@@ -80,7 +82,7 @@ func newReconciler(mgr manager.Manager) reconcile.Reconciler {
 	metricsClient := metrics.NewRESTMetricsClient(
 		resourceclient.NewForConfigOrDie(clientConfig),
 		//TODO:这里需要重新写这里的逻辑 需要看HPA
-		custom_metrics.NewForConfig(clientConfig,mgr.GetRESTMapper(),nil),
+		custom_metrics.NewForConfig(clientConfig, mgr.GetRESTMapper(), nil),
 		external_metrics.NewForConfigOrDie(clientConfig),
 	)
 	clientSet, err := kubernetes.NewForConfig(clientConfig)
@@ -97,7 +99,7 @@ func newReconciler(mgr manager.Manager) reconcile.Reconciler {
 	replicaCalc := NewReplicaCalculator(metricsClient, clientSet.CoreV1(), defaultTolerance)
 	return &SHPAReconciler{
 		Client:        mgr.GetClient(),
-		scheme:        mgr.GetScheme(),
+		Scheme:        mgr.GetScheme(),
 		clientSet:     clientSet,
 		replicaCalc:   replicaCalc,
 		eventRecorder: recorder,
@@ -140,20 +142,20 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 
 var _ reconcile.Reconciler = &SHPAReconciler{}
 
-
 // SHPAReconciler reconciles a SHPA object
 type SHPAReconciler struct {
+	Log logr.gLogger
 	client.Client
 	//replicaCalculator *podautoscaler.ReplicaCalculator
-	scheme        *runtime.Scheme
+	Scheme        *runtime.Scheme
 	clientSet     kubernetes.Interface
 	syncPeriod    time.Duration
 	eventRecorder record.EventRecorder
 	replicaCalc   *ReplicaCalculator
 }
 
-// Reconcile reads that state of the cluster for a CHPA object and makes changes based on the state read
-// and what is in the CHPA.Spec
+// Reconcile reads that state of the cluster for a SHPA object and makes changes based on the state read
+// and what is in the SHPA.Spec
 // The implementation repeats kubernetes hpa implementation from v1.10.8
 
 // Automatically generate RBAC rules to allow the Controller to read and write Deployments
@@ -208,7 +210,7 @@ func (r *SHPAReconciler) Reconcile(request reconcile.Request) (reconcile.Result,
 		log.Printf("Error reading Deployment '%v': %v", namespacedName, err)
 		return resRepeat, nil
 	}
-	if err := controllerutil.SetControllerReference(shpa, deploy, r.scheme); err != nil {
+	if err := controllerutil.SetControllerReference(shpa, deploy, r.Scheme); err != nil {
 		// Error communicating with apiserver, repeat later
 		log.Printf("Can't set the controller reference for the deployment %v: %v", namespacedName, err)
 		return resRepeat, nil
@@ -223,7 +225,6 @@ func (r *SHPAReconciler) Reconcile(request reconcile.Request) (reconcile.Result,
 	}
 	return resRepeat, nil
 }
-
 
 // Function returns an error only when we need to stop working with the CHPA spec
 func (r *SHPAReconciler) reconcileCHPA(shpa *webappv1.SHPA, deploy *appsv1.Deployment) (err error) {
@@ -518,7 +519,6 @@ func (r *SHPAReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Complete(r)
 }
 
-
 // normalizeDesiredReplicas takes the metrics desired replicas value and normalizes it based on the appropriate conditions (i.e. < maxReplicas, >
 // minReplicas, etc...)
 func (r *SHPAReconciler) normalizeDesiredReplicas(shpa *webappv1.SHPA, currentReplicas int32, prenormalizedDesiredReplicas int32) int32 {
@@ -583,7 +583,6 @@ func convertDesiredReplicasWithRules(shpa *webappv1.SHPA, currentReplicas, desir
 
 	return desiredReplicas, "DesiredWithinRange", "the desired count is within the acceptable range"
 }
-
 
 // setCondition sets the specific condition type on the given HPA to the specified value with the given reason
 // and message.  The message and args are treated like a format string.  The condition will be added if it is
